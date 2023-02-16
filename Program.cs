@@ -7,10 +7,20 @@ using System.Collections.Generic;
 return await Pulumi.Deployment.RunAsync(() =>
 {
 
+    // Setup args for GetResourceGroup function
+    var args = new GetResourceGroupInvokeArgs { ResourceGroupName = "rg-ea-azurearc" };
 
-    // Export the primary key of the Storage Account
+    // Invoke GetResourceGroup function
+    var group = GetResourceGroup.Invoke(args,null);
+
+    // Get Resource Group Attributges
+    var name = group.Apply(x => x.Name);
+    var Id = group.Apply(x => x.Id);
+    
+    // Export attributes to view on console
     return new Dictionary<string, object?>
     {
-        ["message"] = "Hello World"
+        ["group"] =  name,
+        ["Id"] = Id,
     };
 });
