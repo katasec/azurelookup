@@ -9,13 +9,39 @@ namespace azurelookup;
 
 public class Handler
 {
-    public static void LookupSubnet()
+
+    public void CreateNic()
     {
-        var x = Network.GetSubnet.Invoke(new()
+        var mySubnetResult = Network.GetSubnet.Invoke(new()
         {
             SubnetName = "blah",
             VirtualNetworkName = "blah",
             ResourceGroupName = "blah"
+        });
+
+        var mySubnetId = mySubnetResult.Apply(x => x.Id);
+
+        var networkInterface = new AzureNative.Network.NetworkInterface("networkInterface", new()
+        {
+            EnableAcceleratedNetworking = true,
+            IpConfigurations = new[]
+            {
+                new AzureNative.Network.Inputs.NetworkInterfaceIPConfigurationArgs
+                {
+                    Name = "ipconfig1",
+                    PublicIPAddress = new AzureNative.Network.Inputs.PublicIPAddressArgs
+                    {
+                        Id = "/subscriptions/subid/resourceGroups/rg1/providers/Microsoft.Network/publicIPAddresses/test-ip",
+                    },
+                    Subnet = new AzureNative.Network.Inputs.SubnetArgs
+                    {
+                        Id = mySubnetId
+                    },
+                },
+            },
+            Location = "eastus",
+            NetworkInterfaceName = "test-nic",
+            ResourceGroupName = "rg1",
         });
     }
     public static Dictionary<string, object?> Lookup()
